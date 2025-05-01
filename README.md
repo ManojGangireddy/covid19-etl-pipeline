@@ -1,30 +1,61 @@
-# COVID-19 ETL Pipeline
+# COVID-19 ETL Pipeline with Machine Learning
 
-This project builds a simple end-to-end ETL pipeline in Python that extracts COVID-19 data from a public API, transforms it using pandas, loads it into a PostgreSQL database, and visualizes the top 5 most affected countries.
+## Overview
+This project demonstrates a complete ETL pipeline using Python. It extracts COVID-19 data from a public API, transforms and cleans it, loads it into a PostgreSQL database, and visualizes trends. Additionally, it applies machine learning (KMeans clustering) to group countries by their case and death counts.
 
-## 🛠 Tech Stack
-- Python 3.9
-- PostgreSQL (via Homebrew on macOS)
-- Pandas, Requests, psycopg2, Matplotlib
-- VS Code
+## Components
+- `extract.py`: Connects to the API and saves raw data as CSV
+- `transform.py`: Cleans and structures the raw data
+- `load.py`: Loads transformed data into a PostgreSQL database
+- `visualize.py`: Generates a bar chart for the top 5 most affected countries
+- `cluster.py`: Applies KMeans clustering and produces a scatter plot with labeled country points
 
-## 🔄 Workflow
-1. **Extract**: Fetch data from `disease.sh` API (`extract.py`)
-2. **Transform**: Clean & sort with pandas (`transform.py`)
-3. **Load**: Insert into PostgreSQL (`load.py`)
-4. **Visualize**: Show top 5 countries (`visualize.py`)
+## Database Setup
+Ensure PostgreSQL is installed and a database named `covid19` is created. Update your credentials in `load.py`.
 
-## 📊 Output
-The script generates a `top5_covid_cases.png` chart showing the most affected countries by total cases.
-
-## 🗃 Database Schema
+Example SQL schema (see `database_schema.sql`):
 ```sql
 CREATE TABLE covid_stats (
-    country TEXT,
+    country VARCHAR(100),
     cases INTEGER,
-    todayCases INTEGER,
     deaths INTEGER,
-    todayDeaths INTEGER,
     recovered INTEGER,
-    active INTEGER
+    active INTEGER,
+    critical INTEGER,
+    casesPerOneMillion FLOAT,
+    population BIGINT,
+    cluster INTEGER
 );
+```
+
+## Installation
+Create and activate a virtual environment, then install dependencies:
+```bash
+python3 -m venv venv
+source venv/bin/activate  # macOS/Linux
+pip install -r requirements.txt
+```
+
+## Flowchart
+```
+[API] → [extract.py] → raw_covid_data.csv
+                  ↓
+          [transform.py] → clean_covid_data.csv
+                           ↓
+                   [load.py] → PostgreSQL DB
+                                ↓
+                         [visualize.py] → top5_countries.png
+                                              ↓
+                         [cluster.py] → clustering_plot.png
+```
+
+## Output
+- `raw_covid_data.csv`: Raw JSON data flattened
+- `clean_covid_data.csv`: Cleaned data ready for loading
+- `top5_countries.png`: Bar chart of top affected countries
+- `clustering_plot.png`: Clustering scatter plot using KMeans
+
+## Notes
+- Modify database connection strings as needed.
+- KMeans can be extended with additional features or dimensionality reduction for deeper insight.
+- Set a cron job to run daily for automated updates.
